@@ -163,7 +163,10 @@
     <div class="form-panel">
         <div id="resultArea" class="result-card">🎀 ¡Gira para tu regalo! 🎀</div>
         
-        <input type="text" id="clienteNombre" placeholder="👤 Tu nombre" autocomplete="off">
+        <!-- ========== CAMPOS: NOMBRE Y TELÉFONO ========== -->
+        <input type="text" id="clienteNombre" placeholder="👤 Tu nombre completo" autocomplete="off">
+        <input type="tel" id="clienteTelefono" placeholder="📱 Tu número de teléfono" autocomplete="off">
+        
         <div id="blockMessage" class="warning-message" style="display: none;"></div>
         <div id="syncStatus" class="sync-status">🔄 Conectando...</div>
         
@@ -182,6 +185,7 @@
 </div>
 
 <script>
+    
     // ==========================================
     // 🔥 TU CONFIGURACIÓN DE FIREBASE
     // ==========================================
@@ -194,6 +198,8 @@
         appId: "1:566401836949:web:f3908f3e8d57f85adfb89c",
         measurementId: "G-Z150EV0PDW"
     };
+    //=================================================
+
     
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
@@ -202,16 +208,16 @@
     // 🎁 REGALOS (CAMBIA AQUÍ)
     // ==========================================
     const PREMIOS = [
-        { nombre: "Consola Gamer",   color: "#FF6B6B",  icono: "🎮" },
-        { nombre: "Peluche Gigante", color: "#4ECDC4",  icono: "🧸" },
-        { nombre: "Tarjeta Regalo",  color: "#FFE66D",  icono: "💎" },
-        { nombre: "Chocolates",      color: "#D4A5A5",  icono: "🍫" },
-        { nombre: "Audífonos BT",    color: "#9B5DE5",  icono: "🎧" },
-        { nombre: "Libro",           color: "#F15BB5",  icono: "📚" },
-        { nombre: "Perfume",         color: "#00BBF9",  icono: "🌸" },
-        { nombre: "Cine en Casa",    color: "#00F5D4",  icono: "🍿" }
+        { nombre: "                    ",   color: "#FF6B6B",  icono: "🎮" },
+        { nombre: "                    ", color: "#4ECDC4",  icono: "🧸" },
+        { nombre: "                    ",  color: "#FFE66D",  icono: "💎" },
+        { nombre: "                    ",      color: "#D4A5A5",  icono: "🍫" },
+        { nombre: "                    ",    color: "#9B5DE5",  icono: "🎧" },
+        { nombre: "                    ",           color: "#F15BB5",  icono: "📚" },
+        { nombre: "                    ",         color: "#00BBF9",  icono: "🌸" },
+        { nombre: "                    ",    color: "#00F5D4",  icono: "🍿" }
     ];
-    
+    //===================================================
     const ADMIN_CLAVE = "12345";  // Cambia la clave aquí
     // ==========================================
     
@@ -238,6 +244,7 @@
     const resultArea = document.getElementById('resultArea');
     const blockMsg = document.getElementById('blockMessage');
     const clienteNombre = document.getElementById('clienteNombre');
+    const clienteTelefono = document.getElementById('clienteTelefono');
     const syncStatus = document.getElementById('syncStatus');
     const adminPanel = document.getElementById('adminPanel');
     const adminToggleBtn = document.getElementById('adminToggleBtn');
@@ -261,7 +268,8 @@
                 spinBtn.classList.add('disabled');
                 blockMsg.style.display = "block";
                 blockMsg.innerText = "🔒 Ya giraste la ruleta. ¡Gracias!";
-                document.querySelector('#clienteNombre').style.display = 'none';
+                document.getElementById('clienteNombre').style.display = 'none';
+                document.getElementById('clienteTelefono').style.display = 'none';
                 return true;
             }
         } catch(e) {
@@ -271,16 +279,18 @@
         return false;
     }
     
-    async function guardarPremio(nombre, premioTexto) {
+    async function guardarPremio(nombre, telefono, premioTexto) {
         try {
             await db.collection('giros').doc(deviceId).set({
                 nombre: nombre,
+                telefono: telefono,
                 premio: premioTexto,
                 fecha: new Date().toISOString(),
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
             await db.collection('historial').add({
                 nombre: nombre,
+                telefono: telefono,
                 premio: premioTexto,
                 fecha: new Date().toISOString(),
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
@@ -312,6 +322,7 @@
                 const fecha = data.fecha ? new Date(data.fecha).toLocaleString() : 'Fecha?';
                 html += `<div class="registro-item">
                             <strong>${data.nombre || 'Anónimo'}</strong>
+                            <span style="font-size:0.7rem;">${data.telefono || 'Sin teléfono'}</span>
                             <span style="background:#ffcd7e; color:#000; padding:2px 12px; border-radius:20px;">${data.premio}</span>
                             <span style="font-size:0.65rem;">${fecha}</span>
                         </div>`;
@@ -326,6 +337,7 @@
     // ==========================================
     // 🎨 DIBUJAR RULETA
     // ==========================================
+    
     function dibujarRuleta(rotacion) {
         if (!ctx) return;
         ctx.clearRect(0, 0, width, height);
@@ -357,7 +369,6 @@
             ctx.restore();
         }
         
-        // Centro
         ctx.beginPath();
         ctx.arc(cx, cy, radio*0.12, 0, 2*Math.PI);
         ctx.fillStyle = "#F4C542";
@@ -381,10 +392,13 @@
         }
         return 0;
     }
+
     
     // ==========================================
     // 🎡 ANIMACIÓN DE GIRO
     // ==========================================
+
+    
     function animarGiro(tiempoActual) {
         if (!girando) return;
         const elapsed = tiempoActual - startTime;
@@ -399,6 +413,7 @@
             const indice = obtenerPremio(rotacionActual);
             const premio = PREMIOS[indice];
             const nombre = clienteNombre.value.trim();
+            const telefono = clienteTelefono.value.trim();
             
             if (!nombre) {
                 resultArea.innerHTML = `🎉 <span class="gift-highlight">${premio.icono} ${premio.nombre}</span> 🎉<br>🎁 ¡Felicidades! 🎁`;
@@ -406,12 +421,13 @@
                 resultArea.innerHTML = `🎉 ¡${nombre}! 🎉<br><span class="gift-highlight">${premio.icono} ${premio.nombre}</span><br>🎁 ¡Felicidades! 🎁`;
             }
             
-            guardarPremio(nombre || 'Anónimo', `${premio.icono} ${premio.nombre}`);
+            guardarPremio(nombre || 'Anónimo', telefono || '', `${premio.icono} ${premio.nombre}`);
             yaGiro = true;
             spinBtn.classList.add('disabled');
             blockMsg.style.display = "block";
             blockMsg.innerText = "✅ ¡Giro completado! ✅";
-            document.querySelector('#clienteNombre').style.display = 'none';
+            document.getElementById('clienteNombre').style.display = 'none';
+            document.getElementById('clienteTelefono').style.display = 'none';
         } else {
             animacionId = requestAnimationFrame(animarGiro);
         }
@@ -432,7 +448,7 @@
         spinBtn.classList.add('disabled');
         animacionId = requestAnimationFrame(animarGiro);
     }
-    
+    //**************************************************************************************
     // ==========================================
     // 📏 REDIMENSIÓN
     // ==========================================
@@ -446,10 +462,12 @@
         dibujarRuleta(rotacionActual);
     }
     window.addEventListener('resize', redimensionar);
+
     
     // ==========================================
     // 🔐 PANEL DE ADMIN
     // ==========================================
+    
     adminToggleBtn.onclick = () => {
         adminPanel.style.display = adminPanel.style.display === 'none' ? 'block' : 'none';
         adminContent.style.display = 'none';
@@ -471,7 +489,7 @@
             let texto = "GANADORES DE LA RULETA\n\n";
             snapshot.forEach(doc => {
                 const d = doc.data();
-                texto += `${d.fecha ? new Date(d.fecha).toLocaleString() : 'Fecha?'} | ${d.nombre} | ${d.premio}\n`;
+                texto += `${d.fecha ? new Date(d.fecha).toLocaleString() : 'Fecha?'} | ${d.nombre} | ${d.telefono || 'Sin teléfono'} | ${d.premio}\n`;
             });
             const blob = new Blob([texto], {type: "text/plain"});
             const link = document.createElement('a');
@@ -482,6 +500,21 @@
             alert("Error al exportar");
         }
     };
+
+
+
+
+
+
+
+    
+//*****************************************************************************
+    //**************************************************************************
+
+
+
+
+
     
     // ==========================================
     // 🚀 INICIO
