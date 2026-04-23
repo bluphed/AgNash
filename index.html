@@ -3,69 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🎁 Ruleta de Regalos - Con Firebase Cloud</title>
-    <!-- Firebase SDKs -->
+    <title>🎁 Ruleta de Regalos</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
-        * {
-            box-sizing: border-box;
-            user-select: none;
-        }
-
+        * { box-sizing: border-box; user-select: none; }
         body {
             background: linear-gradient(145deg, #1a472a 0%, #0e2a1a 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             margin: 0;
             padding: 20px;
         }
-
         .gift-container {
             background: rgba(255,248,225,0.92);
-            border-radius: 80px 80px 60px 60px;
+            border-radius: 80px;
             box-shadow: 0 25px 45px rgba(0,0,0,0.4);
-            padding: 25px 20px 35px 20px;
-            max-width: 750px;
+            padding: 25px 20px 35px;
+            max-width: 700px;
             width: 100%;
         }
-
         .wheel-wrapper {
             position: relative;
             display: flex;
             justify-content: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
-
-        /* FLECHA FIJA APUNTANDO HACIA ABAJO (corregida) */
         .fixed-arrow {
             position: absolute;
             top: -25px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
         }
-        
         .fixed-arrow svg {
-            width: 55px;
-            height: 55px;
-            transform: rotate(180deg); /* La flecha apunta hacia abajo */
+            width: 50px;
+            height: 50px;
+            transform: rotate(180deg);
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
         }
-
         canvas {
             background: #fef1cf;
             border-radius: 50%;
-            box-shadow: 0 20px 35px rgba(0,0,0,0.3), 0 0 0 12px #ffd966, 0 0 0 18px #b87c2e;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.3), 0 0 0 10px #ffd966, 0 0 0 15px #b87c2e;
             max-width: 100%;
             height: auto;
-            width: 100%;
             cursor: pointer;
         }
-
         .spin-btn {
             background: radial-gradient(circle at 30% 10%, #ffd966, #e6a017);
             border: none;
@@ -76,23 +63,11 @@
             color: #2c1a0c;
             box-shadow: 0 8px 0 #8b5a2b;
             cursor: pointer;
-            transition: 0.07s linear;
-            font-family: inherit;
             margin-top: 10px;
+            width: 80%;
         }
-
-        .spin-btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 4px 0 #8b5a2b;
-        }
-
-        .spin-btn.disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            pointer-events: none;
-            transform: translateY(0);
-        }
-
+        .spin-btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #8b5a2b; }
+        .spin-btn.disabled { opacity: 0.6; cursor: not-allowed; pointer-events: none; transform: none; }
         .form-panel {
             background: #2e241f;
             border-radius: 48px;
@@ -101,7 +76,6 @@
             color: #ffefcf;
             text-align: center;
         }
-
         .form-panel input {
             width: 100%;
             padding: 12px;
@@ -111,7 +85,6 @@
             margin: 10px 0;
             text-align: center;
         }
-
         .result-card {
             background: #473b2e;
             border-radius: 40px;
@@ -120,7 +93,6 @@
             font-size: 1.2rem;
             font-weight: bold;
         }
-
         .gift-highlight {
             background: #ffcd7e;
             color: #3b280f;
@@ -129,14 +101,12 @@
             font-size: 1.4rem;
             display: inline-block;
         }
-
         .warning-message {
             background: #d4451ecc;
             border-radius: 50px;
             padding: 10px;
             font-size: 0.9rem;
         }
-
         .admin-btn {
             background: #2c3e50;
             color: white;
@@ -145,10 +115,7 @@
             border-radius: 50px;
             margin-top: 10px;
             cursor: pointer;
-            font-size: 0.8rem;
         }
-
-        /* Panel de administración protegido por contraseña */
         .admin-panel {
             background: #1a1a1a;
             border-radius: 30px;
@@ -158,21 +125,6 @@
             overflow-y: auto;
             display: none;
         }
-
-        .admin-panel h4 {
-            margin: 0 0 10px 0;
-            color: #ffd966;
-        }
-
-        .password-input {
-            margin: 10px 0;
-            padding: 8px;
-            border-radius: 20px;
-            border: none;
-            text-align: center;
-            width: 150px;
-        }
-
         .registro-item {
             background: #333;
             padding: 8px;
@@ -183,75 +135,56 @@
             justify-content: space-between;
             flex-wrap: wrap;
         }
-
-        .sync-status {
-            font-size: 0.7rem;
-            margin-top: 8px;
-            color: #aaa;
-        }
-
-        footer {
-            font-size: 0.7rem;
-            margin-top: 15px;
-            opacity: 0.6;
-        }
-
+        .sync-status { font-size: 0.7rem; margin-top: 8px; color: #aaa; }
+        footer { font-size: 0.7rem; margin-top: 15px; opacity: 0.6; }
         @media (max-width: 560px) {
-            .spin-btn { font-size: 1.4rem; padding: 8px 24px; }
-            .fixed-arrow svg { width: 40px; height: 40px; }
-            .fixed-arrow { top: -18px; }
+            .spin-btn { font-size: 1.4rem; width: 90%; }
+            .fixed-arrow svg { width: 38px; height: 38px; }
         }
     </style>
 </head>
 <body>
 <div class="gift-container">
-    <!-- ========== RULETA CON FLECHA FIJA (APUNTA HACIA ABAJO) ========== -->
+    <!-- RULETA CON FLECHA -->
     <div class="wheel-wrapper">
         <div class="fixed-arrow">
-            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg viewBox="0 0 100 100">
                 <polygon points="50,10 20,45 40,45 40,90 60,90 60,45 80,45" fill="#FFD966" stroke="#B87C2E" stroke-width="3"/>
                 <circle cx="50" cy="25" r="6" fill="#B87C2E"/>
             </svg>
         </div>
-        <canvas id="wheelCanvas" width="600" height="600"></canvas>
+        <canvas id="wheelCanvas" width="550" height="550"></canvas>
     </div>
     
     <div style="text-align: center;">
-        <button id="spinButton" class="spin-btn">🎲 GIRAR RUELTA 🎁</button>
+        <button id="spinButton" class="spin-btn">🎲 GIRAR 🎁</button>
     </div>
 
-    <!-- ========== PANEL DE CLIENTE ========== -->
     <div class="form-panel">
-        <div id="resultArea" class="result-card">🎀 ¡Gira para obtener tu regalo! 🎀</div>
+        <div id="resultArea" class="result-card">🎀 ¡Gira para tu regalo! 🎀</div>
         
-        <div id="clienteForm">
-            <input type="text" id="clienteNombre" placeholder="👤 Tu nombre completo" autocomplete="off">
-            <input type="text" id="clienteTelefono" placeholder="📱 Tu teléfono (opcional)">
-        </div>
-        
+        <input type="text" id="clienteNombre" placeholder="👤 Tu nombre" autocomplete="off">
         <div id="blockMessage" class="warning-message" style="display: none;"></div>
-        <div id="syncStatus" class="sync-status">🔄 Conectando a la nube...</div>
+        <div id="syncStatus" class="sync-status">🔄 Conectando...</div>
         
-        <!-- ========== BOTÓN DE ADMINISTRADOR (PROTEGIDO CON CLAVE 12345) ========== -->
-        <button class="admin-btn" id="adminToggleBtn">🔒 Acceso dueño (requiere clave)</button>
+        <button class="admin-btn" id="adminToggleBtn">📋 Ver ganadores (dueño)</button>
         <div id="adminPanel" class="admin-panel">
-            <h4>🔐 ACCESO RESTRINGIDO - DUEÑO</h4>
-            <input type="password" id="adminPassword" class="password-input" placeholder="Clave (12345)">
-            <button id="unlockAdminBtn" style="margin:5px; padding:5px 15px; border-radius:20px;">🔓 Desbloquear</button>
-            <div id="adminContent" style="display: none;">
-                <h4>📜 HISTORIAL DE PREMIOS (Cloud)</h4>
-                <div id="registroLista">Cargando registros...</div>
-                <button id="exportarBtn" style="margin-top:10px; padding:5px; border-radius:20px;">📎 Exportar a TXT</button>
+            <input type="password" id="adminPassword" placeholder="Clave (12345)" style="width:150px; margin:10px auto; display:block;">
+            <button id="unlockAdminBtn" style="padding:5px 15px; border-radius:20px;">🔓 Entrar</button>
+            <div id="adminContent" style="display: none; margin-top:15px;">
+                <h4>🏆 GANADORES</h4>
+                <div id="registroLista">Cargando...</div>
+                <button id="exportarBtn" style="margin-top:10px; padding:5px; border-radius:20px;">📎 Exportar</button>
             </div>
         </div>
-        <footer>✨ Un giro por cliente | Datos guardados en la nube ✨</footer>
+        <footer>✨ Un giro por persona ✨</footer>
     </div>
 </div>
 
 <script>
-    // ============================================================
-    // ========== 1. CONFIGURACIÓN DE FIREBASE (TUYA) ==========
-    // ============================================================
+    // ==========================================
+    // 🔥 TU CONFIGURACIÓN DE FIREBASE
+    // ==========================================
     const firebaseConfig = {
         apiKey: "AIzaSyAEL1H4poO2fCOl5Dom_Lz5CEU4mCmtzMY",
         authDomain: "agnash-4b584.firebaseapp.com",
@@ -262,54 +195,50 @@
         measurementId: "G-Z150EV0PDW"
     };
     
-    // Inicializar Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     
-    // ============================================================
-    // ========== 2. LISTA DE REGALOS (CAMBIA AQUÍ LOS PREMIOS) ==========
-    // ============================================================
-    const SEGMENTOS = [
+    // ==========================================
+    // 🎁 REGALOS (CAMBIA AQUÍ)
+    // ==========================================
+    const PREMIOS = [
         { nombre: "Consola Gamer",   color: "#FF6B6B",  icono: "🎮" },
         { nombre: "Peluche Gigante", color: "#4ECDC4",  icono: "🧸" },
         { nombre: "Tarjeta Regalo",  color: "#FFE66D",  icono: "💎" },
         { nombre: "Chocolates",      color: "#D4A5A5",  icono: "🍫" },
         { nombre: "Audífonos BT",    color: "#9B5DE5",  icono: "🎧" },
-        { nombre: "Libro Misterioso",color: "#F15BB5",  icono: "📚" },
-        { nombre: "Perfume Premium", color: "#00BBF9",  icono: "🌸" },
+        { nombre: "Libro",           color: "#F15BB5",  icono: "📚" },
+        { nombre: "Perfume",         color: "#00BBF9",  icono: "🌸" },
         { nombre: "Cine en Casa",    color: "#00F5D4",  icono: "🍿" }
     ];
     
-    // ============================================================
-    // ========== 3. CLAVE DE ADMINISTRADOR (CAMBIA AQUÍ SI QUIERES) ==========
-    // ============================================================
-    const ADMIN_PASSWORD = "12345";  // 👈 CAMBIA ESTA CLAVE POR LA QUE QUIERAS
+    const ADMIN_CLAVE = "12345";  // Cambia la clave aquí
+    // ==========================================
     
-    // ============================================================
-    // ========== 4. CONFIGURACIÓN DE LA RULETA ==========
-    // ============================================================
-    const NUM_SEG = SEGMENTOS.length;
-    const ANGULO_POR_SEG = (Math.PI * 2) / NUM_SEG;
+    const NUM_PREMIOS = PREMIOS.length;
+    const ANGULO = (Math.PI * 2) / NUM_PREMIOS;
+    
     let canvas = document.getElementById('wheelCanvas');
     let ctx = canvas.getContext('2d');
     let width, height;
-    let currentRotation = 0;
-    let spinning = false;
-    let animationId = null;
-    let spinStartTime = 0;
-    let spinDuration = 2200;
-    let finalAngleRad = 0;
-    let spinStartRot = 0;
-    let hasSpun = false;
-    let awardedGift = null;
-    let deviceId = null;
+    let rotacionActual = 0;
+    let girando = false;
+    let animacionId = null;
+    let startTime = 0;
+    let anguloFinal = 0;
+    let yaGiro = false;
+    let deviceId = localStorage.getItem('device_id');
+    if (!deviceId) {
+        deviceId = 'dev_' + Date.now() + '_' + Math.random().toString(36).substring(2);
+        localStorage.setItem('device_id', deviceId);
+    }
     
-    // Elementos del DOM
+    // Elementos
     const spinBtn = document.getElementById('spinButton');
     const resultArea = document.getElementById('resultArea');
     const blockMsg = document.getElementById('blockMessage');
     const clienteNombre = document.getElementById('clienteNombre');
-    const clienteTelefono = document.getElementById('clienteTelefono');
+    const syncStatus = document.getElementById('syncStatus');
     const adminPanel = document.getElementById('adminPanel');
     const adminToggleBtn = document.getElementById('adminToggleBtn');
     const unlockAdminBtn = document.getElementById('unlockAdminBtn');
@@ -317,327 +246,256 @@
     const adminContent = document.getElementById('adminContent');
     const registroLista = document.getElementById('registroLista');
     const exportarBtn = document.getElementById('exportarBtn');
-    const syncStatus = document.getElementById('syncStatus');
     
-    // ============================================================
-    // ========== 5. ID ÚNICO DEL DISPOSITIVO (PARA BLOQUEO PERMANENTE) ==========
-    // ============================================================
-    function getDeviceId() {
-        let id = localStorage.getItem('ruleta_device_id');
-        if (!id) {
-            id = 'dev_' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
-            localStorage.setItem('ruleta_device_id', id);
-        }
-        return id;
-    }
-    deviceId = getDeviceId();
+    // ==========================================
+    // 🔄 FUNCIONES DE FIREBASE
+    // ==========================================
     
-    // ============================================================
-    // ========== 6. FUNCIONES DE FIREBASE ==========
-    // ============================================================
-    
-    // Verificar si este dispositivo YA GIRÓ (bloqueo permanente incluso recargando)
-    async function checkIfAlreadySpun() {
+    async function verificarSiYaGiro() {
         try {
-            const docRef = db.collection('giros').doc(deviceId);
-            const doc = await docRef.get();
+            const doc = await db.collection('giros').doc(deviceId).get();
             if (doc.exists) {
-                const data = doc.data();
-                hasSpun = true;
-                awardedGift = data.premio;
-                applyBlockedState(awardedGift);
+                yaGiro = true;
+                const premio = doc.data().premio;
+                resultArea.innerHTML = `🎁 <span class="gift-highlight">${premio}</span> 🎁<br>✅ Ya reclamaste tu premio ✅`;
+                spinBtn.classList.add('disabled');
+                blockMsg.style.display = "block";
+                blockMsg.innerText = "🔒 Ya giraste la ruleta. ¡Gracias!";
+                document.querySelector('#clienteNombre').style.display = 'none';
                 return true;
             }
-        } catch (error) {
-            console.error("Error al verificar:", error);
+        } catch(e) {
+            console.error("Error al verificar:", e);
             syncStatus.innerText = "⚠️ Error de conexión";
         }
         return false;
     }
     
-    // Guardar el premio en Firebase
-    async function saveSpinToCloud(nombre, telefono, premio) {
+    async function guardarPremio(nombre, premioTexto) {
         try {
             await db.collection('giros').doc(deviceId).set({
-                nombre: nombre || 'Anónimo',
-                telefono: telefono || '',
-                premio: premio,
-                fecha: new Date().toISOString(),
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                dispositivo: deviceId
-            });
-            
-            await db.collection('historial').add({
-                nombre: nombre || 'Anónimo',
-                telefono: telefono || '',
-                premio: premio,
+                nombre: nombre,
+                premio: premioTexto,
                 fecha: new Date().toISOString(),
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
-            
-            syncStatus.innerText = "✅ ¡Premio registrado en la nube!";
+            await db.collection('historial').add({
+                nombre: nombre,
+                premio: premioTexto,
+                fecha: new Date().toISOString(),
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            syncStatus.innerText = "✅ Premio guardado";
             return true;
-        } catch (error) {
-            console.error("Error al guardar:", error);
-            syncStatus.innerText = "⚠️ No se pudo guardar en la nube, pero el premio es válido";
+        } catch(e) {
+            console.error("Error al guardar:", e);
+            syncStatus.innerText = "⚠️ Error al guardar";
             return false;
         }
     }
     
-    // Cargar historial de ganadores (solo para administrador)
-    async function cargarHistorial() {
+    async function cargarGanadores() {
         try {
             const snapshot = await db.collection('historial')
                 .orderBy('timestamp', 'desc')
-                .limit(50)
+                .limit(30)
                 .get();
             
             if (snapshot.empty) {
-                registroLista.innerHTML = 'No hay registros aún';
+                registroLista.innerHTML = 'No hay ganadores aún';
                 return;
             }
             
             let html = '';
             snapshot.forEach(doc => {
-                const r = doc.data();
-                const fechaMostrar = r.fecha ? new Date(r.fecha).toLocaleString() : 'Fecha desconocida';
+                const data = doc.data();
+                const fecha = data.fecha ? new Date(data.fecha).toLocaleString() : 'Fecha?';
                 html += `<div class="registro-item">
-                            <span><strong>${r.nombre || 'Anónimo'}</strong> ${r.telefono ? '('+r.telefono+')' : ''}</span>
-                            <span style="background:#ffcd7e; color:#000; padding:2px 8px; border-radius:20px;">${r.premio}</span>
-                            <span style="font-size:0.7rem;">${fechaMostrar}</span>
+                            <strong>${data.nombre || 'Anónimo'}</strong>
+                            <span style="background:#ffcd7e; color:#000; padding:2px 12px; border-radius:20px;">${data.premio}</span>
+                            <span style="font-size:0.65rem;">${fecha}</span>
                         </div>`;
             });
             registroLista.innerHTML = html;
-        } catch (error) {
-            registroLista.innerHTML = 'Error al cargar registros';
+        } catch(e) {
+            registroLista.innerHTML = 'Error: ¿Firestore creado? Verifica reglas';
+            console.error(e);
         }
     }
     
-    // ============================================================
-    // ========== 7. FUNCIONES DE INTERFAZ (BLOQUEO, RESULTADOS) ==========
-    // ============================================================
-    
-    function applyBlockedState(gift) {
-        if (gift && typeof gift === 'object') {
-            resultArea.innerHTML = `🎁 <span class="gift-highlight">${gift.icono || '🎁'} ${gift.nombre || gift}</span> 🎁<br><span style="font-size:0.85rem;">✅ ¡Ya reclamaste tu premio! No puedes volver a girar. ✅</span>`;
-        } else if (gift && typeof gift === 'string') {
-            resultArea.innerHTML = `🎁 <span class="gift-highlight">${gift}</span> 🎁<br><span style="font-size:0.85rem;">✅ ¡Ya reclamaste tu premio! No puedes volver a girar. ✅</span>`;
-        } else {
-            resultArea.innerHTML = `⛔ Ya has participado.<br>Solo un giro por cliente.`;
-        }
-        spinBtn.classList.add('disabled');
-        blockMsg.style.display = "block";
-        blockMsg.innerText = "🔒 Ya giraste la ruleta. ¡Gracias por participar! 🔒";
-        document.getElementById('clienteForm').style.display = 'none';
-    }
-    
-    async function onSpinFinished(index) {
-        if (!spinning) return;
-        spinning = false;
-        if (animationId) cancelAnimationFrame(animationId);
-        const gift = SEGMENTOS[index];
-        
-        const nombre = clienteNombre.value.trim();
-        const telefono = clienteTelefono.value.trim();
-        
-        // Mostrar qué se ganó de forma clara
-        if (!nombre) {
-            await saveSpinToCloud('Anónimo', telefono, `${gift.icono} ${gift.nombre}`);
-            resultArea.innerHTML = `✨ ¡FELICIDADES! ✨<br>🎉 <span class="gift-highlight">${gift.icono} ${gift.nombre}</span> 🎉<br>🥳 ¡Has ganado este premio! 🥳`;
-        } else {
-            await saveSpinToCloud(nombre, telefono, `${gift.icono} ${gift.nombre}`);
-            resultArea.innerHTML = `✨ ¡FELICIDADES ${nombre}! ✨<br>🎉 <span class="gift-highlight">${gift.icono} ${gift.nombre}</span> 🎉<br>🥳 ¡Has ganado este premio! 🥳`;
-        }
-        
-        hasSpun = true;
-        spinBtn.classList.add('disabled');
-        blockMsg.style.display = "block";
-        blockMsg.innerText = "✅ ¡Giro registrado en la nube! ✅";
-        document.getElementById('clienteForm').style.display = 'none';
-        
-        // Si el admin ya tenía el panel abierto, recargar historial
-        if (adminContent.style.display === 'block') {
-            cargarHistorial();
-        }
-    }
-    
-    // ============================================================
-    // ========== 8. DIBUJO DE LA RULETA ==========
-    // ============================================================
-    function drawWheel(rotationRad) {
+    // ==========================================
+    // 🎨 DIBUJAR RULETA
+    // ==========================================
+    function dibujarRuleta(rotacion) {
         if (!ctx) return;
         ctx.clearRect(0, 0, width, height);
-        const centerX = width/2, centerY = height/2;
-        const radius = width * 0.44;
+        const cx = width/2, cy = height/2;
+        const radio = width * 0.44;
         
-        for (let i = 0; i < NUM_SEG; i++) {
-            const start = i * ANGULO_POR_SEG + rotationRad;
-            const end = (i+1) * ANGULO_POR_SEG + rotationRad;
+        for (let i = 0; i < NUM_PREMIOS; i++) {
+            const inicio = i * ANGULO + rotacion;
+            const fin = (i+1) * ANGULO + rotacion;
             ctx.beginPath();
-            ctx.moveTo(centerX, centerY);
-            ctx.arc(centerX, centerY, radius, start, end);
-            ctx.fillStyle = SEGMENTOS[i].color;
+            ctx.moveTo(cx, cy);
+            ctx.arc(cx, cy, radio, inicio, fin);
+            ctx.fillStyle = PREMIOS[i].color;
             ctx.fill();
-            ctx.strokeStyle = "#FFF8E7";
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            ctx.moveTo(centerX, centerY);
-            ctx.arc(centerX, centerY, radius, start, end);
-            ctx.lineTo(centerX, centerY);
+            ctx.strokeStyle = "#FFF";
+            ctx.lineWidth = 2;
             ctx.stroke();
+            
             ctx.save();
-            ctx.translate(centerX, centerY);
-            ctx.rotate(start + ANGULO_POR_SEG/2);
+            ctx.translate(cx, cy);
+            ctx.rotate(inicio + ANGULO/2);
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            let fontSize = Math.max(18, width * 0.045);
-            ctx.font = `bold ${fontSize}px "Segoe UI Emoji", "Segoe UI"`;
+            ctx.font = `bold ${Math.max(14, width * 0.04)}px "Segoe UI Emoji"`;
             ctx.fillStyle = "#1F1A15";
-            let displayText = `${SEGMENTOS[i].icono} ${SEGMENTOS[i].nombre}`;
-            if (displayText.length > 14 && width < 500) {
-                displayText = `${SEGMENTOS[i].icono} ${SEGMENTOS[i].nombre.substring(0, 10)}..`;
-            }
-            ctx.fillText(displayText, radius * 0.72, 6);
+            let texto = `${PREMIOS[i].icono} ${PREMIOS[i].nombre}`;
+            if (texto.length > 12 && width < 450) texto = `${PREMIOS[i].icono} ${PREMIOS[i].nombre.substring(0,8)}..`;
+            ctx.fillText(texto, radio * 0.7, 6);
             ctx.restore();
         }
         
+        // Centro
         ctx.beginPath();
-        ctx.arc(centerX, centerY, radius*0.12, 0, 2*Math.PI);
+        ctx.arc(cx, cy, radio*0.12, 0, 2*Math.PI);
         ctx.fillStyle = "#F4C542";
         ctx.fill();
         ctx.fillStyle = "#8B4513";
-        ctx.font = `bold ${Math.max(20, width*0.045)}px sans-serif`;
-        ctx.fillText("🎁", centerX-12, centerY+8);
+        ctx.font = `bold ${Math.max(18, width*0.045)}px sans-serif`;
+        ctx.fillText("🎁", cx-10, cy+6);
     }
     
-    // ============================================================
-    // ========== 9. LÓGICA DE GIRO ==========
-    // ============================================================
-    function getCurrentSegment(rotationRad) {
-        const fixedPointerAngle = -Math.PI / 2; // La flecha apunta arriba (0 grados es derecha)
-        let angleNorm = ((fixedPointerAngle % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI);
-        for (let i=0; i<NUM_SEG; i++) {
-            let startSeg = (i * ANGULO_POR_SEG + rotationRad) % (2*Math.PI);
-            let endSeg = ((i+1) * ANGULO_POR_SEG + rotationRad) % (2*Math.PI);
-            if (startSeg < endSeg) {
-                if (angleNorm >= startSeg && angleNorm < endSeg) return i;
+    function obtenerPremio(rotacion) {
+        const anguloFlecha = -Math.PI / 2;
+        let anguloNorm = ((anguloFlecha % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI);
+        for (let i = 0; i < NUM_PREMIOS; i++) {
+            let inicio = (i * ANGULO + rotacion) % (2*Math.PI);
+            let fin = ((i+1) * ANGULO + rotacion) % (2*Math.PI);
+            if (inicio < fin) {
+                if (anguloNorm >= inicio && anguloNorm < fin) return i;
             } else {
-                if (angleNorm >= startSeg || angleNorm < endSeg) return i;
+                if (anguloNorm >= inicio || anguloNorm < fin) return i;
             }
         }
         return 0;
     }
     
-    function spinAnimation(now) {
-        if (!spinning) return;
-        const elapsed = now - spinStartTime;
-        let t = Math.min(1, elapsed / spinDuration);
-        const easeOut = 1 - Math.pow(1 - t, 3);
-        const currentRot = spinStartRot + (finalAngleRad - spinStartRot) * easeOut;
-        currentRotation = currentRot % (Math.PI * 2);
-        drawWheel(currentRotation);
+    // ==========================================
+    // 🎡 ANIMACIÓN DE GIRO
+    // ==========================================
+    function animarGiro(tiempoActual) {
+        if (!girando) return;
+        const elapsed = tiempoActual - startTime;
+        let t = Math.min(1, elapsed / 2200);
+        const ease = 1 - Math.pow(1 - t, 3);
+        const rotActual = (anguloFinal * ease) % (Math.PI * 2);
+        rotacionActual = rotActual;
+        dibujarRuleta(rotacionActual);
+        
         if (t >= 1) {
-            const finalIndex = getCurrentSegment(finalAngleRad % (Math.PI*2));
-            onSpinFinished(finalIndex);
-            return;
+            girando = false;
+            const indice = obtenerPremio(rotacionActual);
+            const premio = PREMIOS[indice];
+            const nombre = clienteNombre.value.trim();
+            
+            if (!nombre) {
+                resultArea.innerHTML = `🎉 <span class="gift-highlight">${premio.icono} ${premio.nombre}</span> 🎉<br>🎁 ¡Felicidades! 🎁`;
+            } else {
+                resultArea.innerHTML = `🎉 ¡${nombre}! 🎉<br><span class="gift-highlight">${premio.icono} ${premio.nombre}</span><br>🎁 ¡Felicidades! 🎁`;
+            }
+            
+            guardarPremio(nombre || 'Anónimo', `${premio.icono} ${premio.nombre}`);
+            yaGiro = true;
+            spinBtn.classList.add('disabled');
+            blockMsg.style.display = "block";
+            blockMsg.innerText = "✅ ¡Giro completado! ✅";
+            document.querySelector('#clienteNombre').style.display = 'none';
+        } else {
+            animacionId = requestAnimationFrame(animarGiro);
         }
-        animationId = requestAnimationFrame(spinAnimation);
     }
     
-    function startSpin() {
+    function iniciarGiro() {
         const nombre = clienteNombre.value.trim();
         if (!nombre) {
-            alert('⚠️ Por favor ingresa tu nombre antes de girar (para registrar tu premio)');
+            alert('Ingresa tu nombre para participar');
             return;
         }
-        if (spinning || hasSpun) return;
-        const extraTurns = 6 + Math.floor(Math.random() * 7);
-        const randomSector = Math.random() * (Math.PI * 2);
-        finalAngleRad = currentRotation + (extraTurns * 2 * Math.PI) + randomSector;
-        spinStartRot = currentRotation;
-        spinStartTime = performance.now();
-        spinning = true;
+        if (girando || yaGiro) return;
+        
+        const vueltas = 6 + Math.floor(Math.random() * 8);
+        anguloFinal = rotacionActual + (vueltas * 2 * Math.PI) + (Math.random() * Math.PI * 2);
+        startTime = performance.now();
+        girando = true;
         spinBtn.classList.add('disabled');
-        animationId = requestAnimationFrame(spinAnimation);
+        animacionId = requestAnimationFrame(animarGiro);
     }
     
-    function resizeAndDraw() {
+    // ==========================================
+    // 📏 REDIMENSIÓN
+    // ==========================================
+    function redimensionar() {
         const container = document.querySelector('.wheel-wrapper');
-        const maxSize = Math.min(container.clientWidth, 600);
+        const maxSize = Math.min(container.clientWidth, 550);
         canvas.width = maxSize;
         canvas.height = maxSize;
         width = canvas.width;
         height = canvas.height;
-        drawWheel(currentRotation);
+        dibujarRuleta(rotacionActual);
     }
+    window.addEventListener('resize', redimensionar);
     
-    window.addEventListener('resize', () => resizeAndDraw());
-    
-    // ============================================================
-    // ========== 10. PANEL DE ADMINISTRADOR (PROTEGIDO CON CLAVE) ==========
-    // ============================================================
+    // ==========================================
+    // 🔐 PANEL DE ADMIN
+    // ==========================================
     adminToggleBtn.onclick = () => {
-        if (adminPanel.style.display === 'none') {
-            adminPanel.style.display = 'block';
-            adminContent.style.display = 'none';
-            adminPassword.value = '';
-        } else {
-            adminPanel.style.display = 'none';
-        }
+        adminPanel.style.display = adminPanel.style.display === 'none' ? 'block' : 'none';
+        adminContent.style.display = 'none';
+        adminPassword.value = '';
     };
     
     unlockAdminBtn.onclick = () => {
-        if (adminPassword.value === ADMIN_PASSWORD) {
+        if (adminPassword.value === ADMIN_CLAVE) {
             adminContent.style.display = 'block';
-            cargarHistorial();
-            alert('🔓 Acceso concedido. Bienvenido dueño.');
+            cargarGanadores();
         } else {
-            alert('❌ Clave incorrecta. Acceso denegado.');
-            adminContent.style.display = 'none';
+            alert('Clave incorrecta');
         }
     };
     
     exportarBtn.onclick = async () => {
         try {
             const snapshot = await db.collection('historial').orderBy('timestamp', 'desc').get();
-            let texto = "REGISTRO DE PREMIOS - RULETA\n\n";
+            let texto = "GANADORES DE LA RULETA\n\n";
             snapshot.forEach(doc => {
-                const r = doc.data();
-                const fecha = r.fecha ? new Date(r.fecha).toLocaleString() : 'Fecha desconocida';
-                texto += `${fecha} | ${r.nombre} | ${r.telefono || '-'} | ${r.premio}\n`;
+                const d = doc.data();
+                texto += `${d.fecha ? new Date(d.fecha).toLocaleString() : 'Fecha?'} | ${d.nombre} | ${d.premio}\n`;
             });
             const blob = new Blob([texto], {type: "text/plain"});
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `ruleta_premios_${new Date().toISOString().slice(0,19)}.txt`;
+            link.download = `ganadores_${Date.now()}.txt`;
             link.click();
         } catch(e) {
             alert("Error al exportar");
         }
     };
     
-    // ============================================================
-    // ========== 11. INICIALIZACIÓN (SE EJECUTA AL CARGAR) ==========
-    // ============================================================
-    async function init() {
-        resizeAndDraw();
-        syncStatus.innerText = "🔄 Verificando en la nube...";
-        await checkIfAlreadySpun();  // Esto evita que se pueda girar de nuevo al recargar
-        
-        if (!hasSpun) {
-            spinBtn.onclick = (e) => {
-                e.preventDefault();
-                if (!hasSpun && !spinning) startSpin();
-            };
-            spinBtn.classList.remove('disabled');
-            syncStatus.innerText = "✅ Listo para girar | Datos se guardan en la nube";
-        } else {
-            spinBtn.classList.add('disabled');
-            syncStatus.innerText = "🔒 Ya giraste antes | Datos en la nube";
+    // ==========================================
+    // 🚀 INICIO
+    // ==========================================
+    async function inicio() {
+        redimensionar();
+        spinBtn.onclick = iniciarGiro;
+        await verificarSiYaGiro();
+        if (!yaGiro) {
+            syncStatus.innerText = "✅ Listo para girar";
         }
     }
     
-    init();
+    inicio();
 </script>
 </body>
 </html>
