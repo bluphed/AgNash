@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>🎁 Ruleta de Regalos - Con Firebase Cloud</title>
-    <!-- Firebase SDKs -->
+    <!-- Firebase SDKs (versión compat para que funcione sin import/export) -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
@@ -25,7 +25,6 @@
             padding: 20px;
         }
 
-        /* Contenedor principal - más ancho para que la ruleta sea más grande */
         .gift-container {
             background: rgba(255,248,225,0.92);
             border-radius: 80px 80px 60px 60px;
@@ -35,7 +34,6 @@
             width: 100%;
         }
 
-        /* Wrapper de la ruleta con posicionamiento para la flecha */
         .wheel-wrapper {
             position: relative;
             display: flex;
@@ -43,7 +41,7 @@
             margin-bottom: 30px;
         }
 
-        /* Flecha fija arriba de la ruleta (más grande y visible) */
+        /* Flecha fija arriba */
         .fixed-arrow {
             position: absolute;
             top: -30px;
@@ -56,10 +54,8 @@
         .fixed-arrow svg {
             width: 55px;
             height: 55px;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
         }
 
-        /* Canvas más grande */
         canvas {
             background: #fef1cf;
             border-radius: 50%;
@@ -70,7 +66,6 @@
             cursor: pointer;
         }
 
-        /* Botón girar */
         .spin-btn {
             background: radial-gradient(circle at 30% 10%, #ffd966, #e6a017);
             border: none;
@@ -79,7 +74,6 @@
             padding: 12px 32px;
             border-radius: 60px;
             color: #2c1a0c;
-            text-shadow: 0 1px 0 #ffeeaa;
             box-shadow: 0 8px 0 #8b5a2b;
             cursor: pointer;
             transition: 0.07s linear;
@@ -94,12 +88,10 @@
 
         .spin-btn.disabled {
             opacity: 0.6;
-            transform: translateY(0);
             cursor: not-allowed;
             pointer-events: none;
         }
 
-        /* Panel de formulario y resultados */
         .form-panel {
             background: #2e241f;
             border-radius: 48px;
@@ -193,10 +185,8 @@
             opacity: 0.6;
         }
 
-        /* Responsive */
         @media (max-width: 560px) {
             .spin-btn { font-size: 1.4rem; padding: 8px 24px; }
-            .gift-highlight { font-size: 1.2rem; padding: 6px 18px; }
             .fixed-arrow svg { width: 40px; height: 40px; }
             .fixed-arrow { top: -22px; }
         }
@@ -204,9 +194,7 @@
 </head>
 <body>
 <div class="gift-container">
-    <!-- ========== RULETA CON FLECHA FIJA ARRIBA ========== -->
     <div class="wheel-wrapper">
-        <!-- Flecha fija en la parte superior (apunta hacia la ruleta) -->
         <div class="fixed-arrow">
             <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <polygon points="50,10 20,45 40,45 40,90 60,90 60,45 80,45" fill="#FFD966" stroke="#B87C2E" stroke-width="3"/>
@@ -220,7 +208,6 @@
         <button id="spinButton" class="spin-btn">🎲 GIRAR RUELTA 🎁</button>
     </div>
 
-    <!-- ========== PANEL DE CLIENTE Y RESULTADOS ========== -->
     <div class="form-panel">
         <div id="resultArea" class="result-card">🎀 ¡Gira para obtener tu regalo! 🎀</div>
         
@@ -232,7 +219,6 @@
         <div id="blockMessage" class="warning-message" style="display: none;"></div>
         <div id="syncStatus" class="sync-status">🔄 Conectando a la nube...</div>
         
-        <!-- ========== PANEL DE ADMINISTRADOR (DUEÑO) ========== -->
         <button class="admin-btn" id="adminToggleBtn">📋 Ver registros (dueño)</button>
         <div id="adminPanel" class="admin-panel">
             <h4>📜 HISTORIAL DE PREMIOS (Cloud)</h4>
@@ -245,28 +231,25 @@
 
 <script>
     // ============================================================
-    // ========== 1. CONFIGURACIÓN DE FIREBASE (REEMPLAZAR AQUÍ) ==========
+    // ========== 1. TU CONFIGURACIÓN DE FIREBASE (YA INCLUIDA) ==========
     // ============================================================
-    // 🔥 REEMPLAZA ESTOS DATOS CON LOS DE TU PROYECTO EN FIREBASE 🔥
     const firebaseConfig = {
-        apiKey: "TU_API_KEY",
-        authDomain: "tu-proyecto.firebaseapp.com",
-        projectId: "tu-proyecto",
-        storageBucket: "tu-proyecto.appspot.com",
-        messagingSenderId: "123456789",
-        appId: "1:123456789:web:abcd1234"
+        apiKey: "AIzaSyAEL1H4poO2fCOl5Dom_Lz5CEU4mCmtzMY",
+        authDomain: "agnash-4b584.firebaseapp.com",
+        projectId: "agnash-4b584",
+        storageBucket: "agnash-4b584.firebasestorage.app",
+        messagingSenderId: "566401836949",
+        appId: "1:566401836949:web:f3908f3e8d57f85adfb89c",
+        measurementId: "G-Z150EV0PDW"
     };
-    // ========== FIN DE LA CONFIGURACIÓN DE FIREBASE ==========
     
     // Inicializar Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     
     // ============================================================
-    // ========== 2. LISTA DE REGALOS (PERSONALIZAR AQUÍ) ==========
+    // ========== 2. LISTA DE REGALOS (CAMBIA AQUÍ LOS PREMIOS) ==========
     // ============================================================
-    // Puedes agregar, quitar o modificar regalos libremente
-    // Cada regalo tiene: nombre (texto visible), color (fondo), icono (emoji)
     const SEGMENTOS = [
         { nombre: "Consola Gamer",   color: "#FF6B6B",  icono: "🎮" },
         { nombre: "Peluche Gigante", color: "#4ECDC4",  icono: "🧸" },
@@ -277,7 +260,6 @@
         { nombre: "Perfume Premium", color: "#00BBF9",  icono: "🌸" },
         { nombre: "Cine en Casa",    color: "#00F5D4",  icono: "🍿" }
     ];
-    // ========== FIN DE LISTA DE REGALOS ==========
     
     // ============================================================
     // ========== 3. CONFIGURACIÓN DE LA RULETA ==========
@@ -291,14 +273,14 @@
     let spinning = false;
     let animationId = null;
     let spinStartTime = 0;
-    let spinDuration = 2200;        // Duración del giro en milisegundos (2200 = 2.2 segundos)
+    let spinDuration = 2200;
     let finalAngleRad = 0;
     let spinStartRot = 0;
     let hasSpun = false;
     let awardedGift = null;
     let deviceId = null;
     
-    // ========== ELEMENTOS DEL DOM ==========
+    // Elementos del DOM
     const spinBtn = document.getElementById('spinButton');
     const resultArea = document.getElementById('resultArea');
     const blockMsg = document.getElementById('blockMessage');
@@ -310,9 +292,7 @@
     const exportarBtn = document.getElementById('exportarBtn');
     const syncStatus = document.getElementById('syncStatus');
     
-    // ============================================================
-    // ========== 4. FUNCIONES DE IDENTIFICACIÓN DE DISPOSITIVO ==========
-    // ============================================================
+    // ID único del dispositivo
     function getDeviceId() {
         let id = localStorage.getItem('ruleta_device_id');
         if (!id) {
@@ -323,9 +303,7 @@
     }
     deviceId = getDeviceId();
     
-    // ============================================================
-    // ========== 5. FUNCIONES DE FIREBASE (GUARDAR Y VERIFICAR) ==========
-    // ============================================================
+    // Verificar si ya giró
     async function checkIfAlreadySpun() {
         try {
             const docRef = db.collection('giros').doc(deviceId);
@@ -338,12 +316,13 @@
                 return true;
             }
         } catch (error) {
-            console.error("Error al verificar:", error);
-            syncStatus.innerText = "⚠️ Error de conexión, pero puedes seguir";
+            console.error("Error:", error);
+            syncStatus.innerText = "⚠️ Error de conexión";
         }
         return false;
     }
     
+    // Guardar en Firebase
     async function saveSpinToCloud(nombre, telefono, premio) {
         try {
             await db.collection('giros').doc(deviceId).set({
@@ -367,11 +346,12 @@
             return true;
         } catch (error) {
             console.error("Error al guardar:", error);
-            syncStatus.innerText = "⚠️ No se pudo guardar en la nube, pero el premio es válido";
+            syncStatus.innerText = "⚠️ No se pudo guardar en la nube";
             return false;
         }
     }
     
+    // Cargar historial
     async function cargarHistorial() {
         try {
             const snapshot = await db.collection('historial')
@@ -396,19 +376,13 @@
             });
             registroLista.innerHTML = html;
         } catch (error) {
-            console.error("Error cargando historial:", error);
             registroLista.innerHTML = 'Error al cargar registros';
         }
     }
     
-    // ============================================================
-    // ========== 6. FUNCIONES DE INTERFAZ DE USUARIO (BLOQUEO, RESULTADOS) ==========
-    // ============================================================
     function applyBlockedState(gift) {
         if (gift && typeof gift === 'object') {
             resultArea.innerHTML = `🎁 <span class="gift-highlight">${gift.icono || '🎁'} ${gift.nombre || gift}</span> 🎁<br><span style="font-size:0.85rem;">✅ Ya utilizaste tu oportunidad ✅</span>`;
-        } else if (gift && typeof gift === 'string') {
-            resultArea.innerHTML = `🎁 <span class="gift-highlight">${gift}</span> 🎁<br><span style="font-size:0.85rem;">✅ Ya utilizaste tu oportunidad ✅</span>`;
         } else {
             resultArea.innerHTML = `⛔ Ya has participado.<br>Solo un giro por cliente.`;
         }
@@ -441,20 +415,15 @@
         blockMsg.innerText = "✅ ¡Giro registrado en la nube! ✅";
         document.getElementById('clienteForm').style.display = 'none';
         
-        if (adminPanel.style.display === 'block') {
-            cargarHistorial();
-        }
+        if (adminPanel.style.display === 'block') cargarHistorial();
     }
     
-    // ============================================================
-    // ========== 7. DIBUJO DE LA RULETA (TEXTO MÁS GRANDE Y AJUSTADO) ==========
-    // ============================================================
+    // Dibujar ruleta
     function drawWheel(rotationRad) {
         if (!ctx) return;
         ctx.clearRect(0, 0, width, height);
         const centerX = width/2, centerY = height/2;
-        const radius = width * 0.44;  // Radio ligeramente reducido para que el texto quede dentro
-        const textRadius = radius * 0.72; // Texto más hacia adentro para que no se salga
+        const radius = width * 0.44;
         
         for (let i = 0; i < NUM_SEG; i++) {
             const start = i * ANGULO_POR_SEG + rotationRad;
@@ -476,36 +445,27 @@
             ctx.rotate(start + ANGULO_POR_SEG/2);
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            // Tamaño de fuente dinámico pero más grande
             let fontSize = Math.max(18, width * 0.045);
-            ctx.font = `bold ${fontSize}px "Segoe UI Emoji", "Segoe UI", system-ui`;
+            ctx.font = `bold ${fontSize}px "Segoe UI Emoji", "Segoe UI"`;
             ctx.fillStyle = "#1F1A15";
-            ctx.shadowBlur = 0;
-            // Texto con icono + nombre acortado si es muy largo
             let displayText = `${SEGMENTOS[i].icono} ${SEGMENTOS[i].nombre}`;
             if (displayText.length > 14 && width < 500) {
                 displayText = `${SEGMENTOS[i].icono} ${SEGMENTOS[i].nombre.substring(0, 10)}..`;
             }
-            ctx.fillText(displayText, textRadius, 6);
+            ctx.fillText(displayText, radius * 0.72, 6);
             ctx.restore();
         }
         
-        // Círculo central decorativo
         ctx.beginPath();
         ctx.arc(centerX, centerY, radius*0.12, 0, 2*Math.PI);
         ctx.fillStyle = "#F4C542";
-        ctx.shadowBlur = 3;
         ctx.fill();
         ctx.fillStyle = "#8B4513";
         ctx.font = `bold ${Math.max(20, width*0.045)}px sans-serif`;
         ctx.fillText("🎁", centerX-12, centerY+8);
     }
     
-    // ============================================================
-    // ========== 8. LÓGICA DE GIRO Y ANIMACIÓN ==========
-    // ============================================================
     function getCurrentSegment(rotationRad) {
-        // La flecha fija está en la parte superior (ángulo -PI/2)
         const fixedPointerAngle = -Math.PI / 2;
         let angleNorm = ((fixedPointerAngle % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI);
         for (let i=0; i<NUM_SEG; i++) {
@@ -539,11 +499,10 @@
     function startSpin() {
         const nombre = clienteNombre.value.trim();
         if (!nombre) {
-            alert('⚠️ Por favor ingresa tu nombre antes de girar (para registrar tu premio)');
+            alert('⚠️ Por favor ingresa tu nombre antes de girar');
             return;
         }
         if (spinning || hasSpun) return;
-        // Número de vueltas aleatorias entre 6 y 12
         const extraTurns = 6 + Math.floor(Math.random() * 7);
         const randomSector = Math.random() * (Math.PI * 2);
         finalAngleRad = currentRotation + (extraTurns * 2 * Math.PI) + randomSector;
@@ -554,12 +513,8 @@
         animationId = requestAnimationFrame(spinAnimation);
     }
     
-    // ============================================================
-    // ========== 9. FUNCIONES DE REDIMENSIÓN Y RESPONSIVE ==========
-    // ============================================================
     function resizeAndDraw() {
         const container = document.querySelector('.wheel-wrapper');
-        // Tamaño máximo de la ruleta: 600px (más grande que antes)
         const maxSize = Math.min(container.clientWidth, 600);
         canvas.width = maxSize;
         canvas.height = maxSize;
@@ -570,9 +525,7 @@
     
     window.addEventListener('resize', () => resizeAndDraw());
     
-    // ============================================================
-    // ========== 10. CONFIGURACIÓN DEL PANEL ADMIN Y BOTONES ==========
-    // ============================================================
+    // Panel admin
     adminToggleBtn.onclick = () => {
         if (adminPanel.style.display === 'none') {
             adminPanel.style.display = 'block';
@@ -601,9 +554,7 @@
         }
     };
     
-    // ============================================================
-    // ========== 11. INICIALIZACIÓN DE LA APLICACIÓN ==========
-    // ============================================================
+    // Inicializar
     async function init() {
         resizeAndDraw();
         syncStatus.innerText = "🔄 Verificando en la nube...";
